@@ -10,7 +10,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
+/*
+* Utility to perform all JWT related activities
+*/
 @Service
 public class JwtUtil {
 
@@ -36,11 +38,18 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
+    /*
+     * Generates a JWT token based on the User Details passed in input. It can also add extra claims for the user.
+     */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, userDetails.getUsername());
     }
 
+    /*
+     * Creates a JWT Token using JWT API builder pattern. It sets the user claims, username/subject, token issue date,
+     * token expiry duration and then signs token with HS256 Algorithm using a secret key.
+     */
     private String createToken(Map<String, Object> claims, String subject) {
 
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))

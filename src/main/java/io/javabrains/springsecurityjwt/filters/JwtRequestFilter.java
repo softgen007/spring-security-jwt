@@ -16,6 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+/*
+ * Intercepts all incoming requests once and then passes on request to other filters in the chain
+ */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
@@ -25,6 +28,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    /*
+     * Fetches JWT token from HTTP Request Authorization header.
+     * Extracts User Name using JWT Util class method.
+     * If authenticated user does not exist in security context then:
+     * Loads User Details using UserDetails service.
+     * Validates JWT Token against retrieved User Detail using JWT Util class method.
+     * Sets authenticated user in Security context.
+     * Passes request to filter chain.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {

@@ -48,11 +48,22 @@ class HelloWorldController {
 	@Autowired
 	private MyUserDetailsService userDetailsService;
 
+	/*
+	 * Expects a JWT Bearer Token in HTTP Request Authorization Header due to 
+	 * HTTP Security configuration in WebSecurityConfig HttpSecurity method by adding a filter.
+	 */
 	@RequestMapping({ "/hello" })
 	public String firstPage() {
 		return "Hello World";
 	}
 
+	/*
+	 * Takes username and password in POST Body and performs authentication by using authentication manager.
+	 * If Authentication is successful then:
+	 * Fetches user details by passing username in request body to UserDetails service.
+	 * Generates JWT token by passing user details in JWT Util's service generateToken method.
+	 * Returns generated JWT token in response body.
+	 */
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
 
@@ -99,13 +110,25 @@ class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		return super.authenticationManagerBean();
 	}
 
+	/*
+	 * Authenticates all requests except request to /authenticate url.
+	 */
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf().disable()
 				.authorizeRequests().antMatchers("/authenticate").permitAll().
 						anyRequest().authenticated().and().
-						exceptionHandling().and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+						exceptionHandling().and()
+						/*
+						 * Instructs Spring security to keep session management stateless i.e. do not maintain session
+						 * in order to use JWT authentication.
+						 */
+						.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		
+		/*
+		 * Adds Username Password authentication filter in filter chain 
+		 * to intercept each request for authentication by using custom defined JwtRequestFilter.
+		 */
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
 	}
